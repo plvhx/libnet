@@ -14,7 +14,7 @@ SO_OBJS := \
 all: libnet
 
 clean:
-	rm -f *.o *.so.2
+	rm -f $(SRCDIR)/*.o *.so.2
 
 install:
 	ln -sf $(shell pwd)/$(SONAME) ../
