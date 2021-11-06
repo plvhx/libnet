@@ -38,6 +38,7 @@ SRCDIR    := ./lib
 SO_OBJS := \
 	$(SRCDIR)/readline.o \
 	$(SRCDIR)/readn.o \
+	$(SRCDIR)/sock_bind_wild.o \
 	$(SRCDIR)/sock_ntop.o \
 	$(SRCDIR)/writen.o
 
@@ -60,6 +61,9 @@ $(SRCDIR)/readline.o: $(SRCDIR)/readline.c
 	$(CC) $(CFLAGS_O) $< -o $@
 
 $(SRCDIR)/readn.o: $(SRCDIR)/readn.c
+	$(CC) $(CFLAGS_O) $< -o $@
+
+$(SRCDIR)/sock_bind_wild.o: $(SRCDIR)/sock_bind_wild.c
 	$(CC) $(CFLAGS_O) $< -o $@
 
 $(SRCDIR)/sock_ntop.o: $(SRCDIR)/sock_ntop.c

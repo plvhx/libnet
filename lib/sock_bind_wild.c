@@ -31,71 +31,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __BYTE_H__
-#define __BYTE_H__
-
-#include <stdint.h>
-
 #if (defined __linux__ || defined __sun || defined __FreeBSD__)
-#include <arpa/inet.h>
+#include <strings.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <netinet/in.h>
+#include <sys/socket.h>
 
-static inline uint16_t __htons(uint16_t val) {
-  uint16_t a = ((val & 0x00ff) >> 0) << 8;
-  uint16_t b = ((val & 0xff00) >> 8) << 0;
-  return (a | b);
+#include "../include/net.h"
+
+int sock_bind_wild(int fd, int family) {
+  socklen_t slen;
+
+  switch (family) {
+  case AF_INET: {
+    struct sockaddr_in s;
+
+    bzero(&s, sizeof(struct sockaddr_in));
+
+    s.sin_family = AF_INET;
+    s.sin_port = platform_htons(0);
+    s.sin_addr.s_addr = platform_htonl(INADDR_ANY);
+
+    if (bind(fd, (struct sockaddr *)&s, sizeof(struct sockaddr_in)) < 0)
+      return -1;
+
+    slen = sizeof(struct sockaddr_in);
+
+    if (getsockname(fd, (struct sockaddr *)&s, &slen) < 0)
+      return -1;
+
+    return s.sin_port;
+  }
+  case AF_INET6: {
+    struct sockaddr_in6 s;
+
+    bzero(&s, sizeof(struct sockaddr_in6));
+
+    s.sin6_family = AF_INET6;
+    s.sin6_port = platform_htons(0);
+    s.sin6_addr = in6addr_any;
+
+    if (bind(fd, (struct sockaddr *)&s, sizeof(struct sockaddr_in6)) < 0)
+      return -1;
+
+    slen = sizeof(struct sockaddr_in6);
+
+    if (getsockname(fd, (struct sockaddr *)&s, &slen) < 0)
+      return -1;
+
+    return s.sin6_port;
+  }
+  }
+
+  return -1;
 }
-
-static inline uint16_t __ntohs(uint16_t val) { return __htons(val); }
-
-static inline uint32_t __htonl(uint32_t val) {
-  uint32_t a = ((val & 0x000000ff) >> 0) << 24;
-  uint32_t b = ((val & 0x0000ff00) >> 8) << 16;
-  uint32_t c = ((val & 0x00ff0000) >> 16) << 8;
-  uint32_t d = ((val & 0xff000000) >> 24) << 0;
-  return (a | b | c | d);
-}
-
-static inline uint32_t __ntohl(uint32_t val) { return __htonl(val); }
-
-#ifndef platform_htons
-#if (defined __linux__ || defined __sun || defined __FreeBSD__)
-#define platform_htons htons
-#else
-#define platform_htons __htons
-#endif
-#endif
-
-#ifndef platform_ntohs
-#if (defined __linux__ || defined __sun || defined __FreeBSD__)
-#define platform_ntohs ntohs
-#else
-#define platform_ntohs __ntohs
-#endif
-#endif
-
-#ifndef platforn_htonl
-#if (defined __linux__ || defined __sun || defined __FreeBSD__)
-#define platform_htonl htonl
-#else
-#define platform_htonl __htonl
-#endif
-#endif
-
-#ifndef platform_ntohl
-#if (defined __linux__ || defined __sun || defined __FreeBSD__)
-#define platform_ntohl ntohl
-#else
-#define platform_ntohl __ntohl
-#endif
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __BYTE_H__ */
