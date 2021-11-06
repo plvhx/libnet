@@ -31,31 +31,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NET_H__
-#define __NET_H__
-
-#include "bits/net.h"
-#include "byte.h"
+#include <netinet/in.h>
 #include <sys/socket.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "../include/net.h"
 
-int sock_bind_wild(int fd, int family);
-int sock_cmp_addr(const struct sockaddr *s1, const struct sockaddr *s2,
-                  socklen_t addrlen);
-int sock_cmp_port(const struct sockaddr *s1, const struct sockaddr *s2,
-                  socklen_t addrlen);
-int sock_get_port(const struct sockaddr *sa, socklen_t salen);
-char *sock_ntop(const struct sockaddr *sa, socklen_t addrlen);
-ssize_t readn(int fd, void *buff, size_t nbytes);
-ssize_t writen(int fd, const void *buff, size_t nbytes);
-ssize_t readline(int fd, void *buff, size_t maxlen);
-ssize_t readlinebuf(void **vptr);
+int sock_get_port(const struct sockaddr *sa, socklen_t salen) {
+  switch (sa->sa_family) {
+  case AF_INET: {
+    struct sockaddr_in *s = (struct sockaddr_in *)sa;
+    return s->sin_port;
+  }
+  case AF_INET6: {
+    struct sockaddr_in6 *s = (struct sockaddr_in6 *)sa;
+    return s->sin6_port;
+  }
+  }
 
-#ifdef __cplusplus
+  return -1;
 }
-#endif
-
-#endif /* __NET_H__ */
