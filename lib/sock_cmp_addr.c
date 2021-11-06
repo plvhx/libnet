@@ -31,28 +31,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NET_H__
-#define __NET_H__
-
-#include "bits/net.h"
-#include "byte.h"
+#include <netinet/in.h>
+#include <string.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 
-#ifdef __cplusplus
-extern "C" {
+#ifdef HAVE_SOCKADDR_DL_STRUCT
+#include <net/if_dl.h>
 #endif
 
-int sock_bind_wild(int fd, int family);
+#include "../include/net.h"
+
 int sock_cmp_addr(const struct sockaddr *s1, const struct sockaddr *s2,
-                  socklen_t addrlen);
-char *sock_ntop(const struct sockaddr *sa, socklen_t addrlen);
-ssize_t readn(int fd, void *buff, size_t nbytes);
-ssize_t writen(int fd, const void *buff, size_t nbytes);
-ssize_t readline(int fd, void *buff, size_t maxlen);
-ssize_t readlinebuf(void **vptr);
+                  socklen_t addrlen) {
+  if (s1->sa_family != s2->sa_family)
+    return -1;
 
-#ifdef __cplusplus
-}
+  switch (s1->sa_family) {
+  case AF_INET:
+    return memcmp(&((struct sockaddr_in *)s1)->sin_addr,
+                  &((struct sockaddr_in *)s2)->sin_addr,
+                  sizeof(struct in_addr));
+  case AF_INET6:
+    return memcmp(&((struct sockaddr_in6 *)s1)->sin6_addr,
+                  &((struct sockaddr_in6 *)s2)->sin6_addr,
+                  sizeof(struct in6_addr));
+  case AF_UNIX:
+    return strcmp(((struct sockaddr_un *)s1)->sun_path,
+                  ((struct sockaddr_un *)s2)->sun_path);
+#ifdef HAVE_SOCKADDR_DL_STRUCT
+  case AF_LINK:
+    return -1;
 #endif
+  }
 
-#endif /* __NET_H__ */
+  return -1;
+}
