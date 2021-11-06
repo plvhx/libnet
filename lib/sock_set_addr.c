@@ -31,38 +31,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NET_H__
-#define __NET_H__
-
-#include "bits/net.h"
-#include "byte.h"
+#include <netinet/in.h>
+#include <string.h>
 #include <sys/socket.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "../include/net.h"
 
-int sock_bind_wild(int fd, int family);
+void sock_set_addr(const struct sockaddr *sa, socklen_t salen, void *ptr) {
+  switch (sa->sa_family) {
+  case AF_INET: {
+    struct sockaddr_in *s = (struct sockaddr_in *)sa;
 
-int sock_cmp_addr(const struct sockaddr *s1, const struct sockaddr *s2,
-                  socklen_t addrlen);
-int sock_cmp_port(const struct sockaddr *s1, const struct sockaddr *s2,
-                  socklen_t addrlen);
+    memcpy(&s->sin_addr, ptr, sizeof(struct in_addr));
+    break;
+  }
+  case AF_INET6: {
+    struct sockaddr_in6 *s = (struct sockaddr_in6 *)sa;
 
-int sock_get_port(const struct sockaddr *sa, socklen_t salen);
+    memcpy(&s->sin6_addr, ptr, sizeof(struct in6_addr));
+    break;
+  }
+  }
 
-void sock_set_addr(const struct sockaddr *sa, socklen_t salen, void *ptr);
-
-char *sock_ntop(const struct sockaddr *sa, socklen_t addrlen);
-char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen);
-
-ssize_t readn(int fd, void *buff, size_t nbytes);
-ssize_t writen(int fd, const void *buff, size_t nbytes);
-ssize_t readline(int fd, void *buff, size_t maxlen);
-ssize_t readlinebuf(void **vptr);
-
-#ifdef __cplusplus
+  return;
 }
-#endif
-
-#endif /* __NET_H__ */
