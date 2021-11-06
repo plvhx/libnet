@@ -31,36 +31,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NET_H__
-#define __NET_H__
-
-#include "bits/net.h"
-#include "byte.h"
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <stdio.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "../include/net.h"
 
-int sock_bind_wild(int fd, int family);
+static char *__deserialize_sa_af_unix(const void **ptr,
+                                      const struct sockaddr *sa,
+                                      socklen_t salen) {
+  struct sockaddr_un *u = (struct sockaddr_un *)sa;
+  const char *__un_zero = "(no pathname bound)";
+  char *bptr = (char *)(*ptr);
 
-int sock_cmp_addr(const struct sockaddr *s1, const struct sockaddr *s2,
-                  socklen_t addrlen);
-int sock_cmp_port(const struct sockaddr *s1, const struct sockaddr *s2,
-                  socklen_t addrlen);
-
-int sock_get_port(const struct sockaddr *sa, socklen_t salen);
-
-char *sock_ntop(const struct sockaddr *sa, socklen_t addrlen);
-char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen);
-
-ssize_t readn(int fd, void *buff, size_t nbytes);
-ssize_t writen(int fd, const void *buff, size_t nbytes);
-ssize_t readline(int fd, void *buff, size_t maxlen);
-ssize_t readlinebuf(void **vptr);
-
-#ifdef __cplusplus
+  snprintf(bptr, ADDR_BUF_LEN, "%s",
+           u->sun_path[0] == '\0' ? __un_zero : u->sun_path);
+  return bptr;
 }
-#endif
 
-#endif /* __NET_H__ */
+char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen) {
+  static char buff[ADDR_BUF_LEN + 1];
+
+  bzero(buff, ADDR_BUF_LEN + 1);
+
+  switch (sa->sa_family) {
+  case AF_INET: {
+    struct sockaddr_in *s = (struct sockaddr_in *)sa;
+
+    if (inet_ntop(s->sin_family, &s->sin_addr, buff, ADDR_BUF_LEN) == NULL)
+      return NULL;
+
+    break;
+  }
+  case AF_INET6: {
+    struct sockaddr_in6 *s = (struct sockaddr_in6 *)sa;
+
+    if (inet_ntop(s->sin6_family, &s->sin6_addr, buff, ADDR_BUF_LEN) == NULL)
+      return NULL;
+
+    break;
+  }
+#ifdef AF_UNIX
+  case AF_UNIX:
+    __deserialize_sa_af_unix((const void **)&buff, sa, salen);
+    break;
+#endif
+  }
+
+  return buff;
+}
