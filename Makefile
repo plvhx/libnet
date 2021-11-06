@@ -40,6 +40,7 @@ SO_OBJS := \
 	$(SRCDIR)/readn.o \
 	$(SRCDIR)/sock_bind_wild.o \
 	$(SRCDIR)/sock_cmp_addr.o \
+	$(SRCDIR)/sock_cmp_port.o \
 	$(SRCDIR)/sock_ntop.o \
 	$(SRCDIR)/writen.o
 
@@ -68,6 +69,9 @@ $(SRCDIR)/sock_bind_wild.o: $(SRCDIR)/sock_bind_wild.c
 	$(CC) $(CFLAGS_O) $< -o $@
 
 $(SRCDIR)/sock_cmp_addr.o: $(SRCDIR)/sock_cmp_addr.c
+	$(CC) $(CFLAGS_O) $< -o $@
+
+$(SRCDIR)/sock_cmp_port.o: $(SRCDIR)/sock_cmp_port.c
 	$(CC) $(CFLAGS_O) $< -o $@
 
 $(SRCDIR)/sock_ntop.o: $(SRCDIR)/sock_ntop.c
