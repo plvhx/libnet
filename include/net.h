@@ -51,8 +51,9 @@ int sock_cmp_port(const struct sockaddr *s1, const struct sockaddr *s2,
 
 int sock_get_port(const struct sockaddr *sa, socklen_t salen);
 
-void sock_set_addr(const struct sockaddr *sa, socklen_t salen, void *ptr);
+void sock_set_addr(const struct sockaddr *sa, socklen_t salen, const void *ptr);
 void sock_set_port(const struct sockaddr *sa, socklen_t salen, uint16_t port);
+void sock_set_wild(struct sockaddr *sa, socklen_t salen);
 
 char *sock_ntop(const struct sockaddr *sa, socklen_t addrlen);
 char *sock_ntop_host(const struct sockaddr *sa, socklen_t salen);

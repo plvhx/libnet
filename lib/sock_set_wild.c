@@ -32,27 +32,29 @@
  */
 
 #include <netinet/in.h>
-#include <string.h>
 #include <sys/socket.h>
 
 #include "../include/net.h"
 
-void sock_set_addr(const struct sockaddr *sa, socklen_t salen,
-                   const void *ptr) {
+void sock_set_wild(struct sockaddr *sa, socklen_t salen) {
+  const void *wptr;
+
   switch (sa->sa_family) {
   case AF_INET: {
-    struct sockaddr_in *s = (struct sockaddr_in *)sa;
+    static struct in_addr in;
 
-    memcpy(&s->sin_addr, ptr, sizeof(struct in_addr));
+    in.s_addr = platform_htonl(INADDR_ANY);
+    wptr = &in;
     break;
   }
   case AF_INET6: {
-    struct sockaddr_in6 *s = (struct sockaddr_in6 *)sa;
-
-    memcpy(&s->sin6_addr, ptr, sizeof(struct in6_addr));
+    wptr = &in6addr_any;
     break;
   }
+  default:
+    return;
   }
 
+  sock_set_addr(sa, salen, wptr);
   return;
 }
