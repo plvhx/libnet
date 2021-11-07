@@ -45,6 +45,7 @@ SO_OBJS := \
 	$(SRCDIR)/sock_ntop.o \
 	$(SRCDIR)/sock_ntop_host.o \
 	$(SRCDIR)/sock_set_addr.o \
+	$(SRCDIR)/sock_set_port.o \
 	$(SRCDIR)/writen.o
 
 all: libnet
@@ -87,6 +88,9 @@ $(SRCDIR)/sock_ntop_host.o: $(SRCDIR)/sock_ntop_host.c
 	$(CC) $(CFLAGS_O) $< -o $@
 
 $(SRCDIR)/sock_set_addr.o: $(SRCDIR)/sock_set_addr.c
+	$(CC) $(CFLAGS_O) $< -o $@
+
+$(SRCDIR)/sock_set_port.o: $(SRCDIR)/sock_set_port.c
 	$(CC) $(CFLAGS_O) $< -o $@
 
 $(SRCDIR)/writen.o: $(SRCDIR)/writen.c
